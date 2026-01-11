@@ -1,129 +1,597 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title>Arabic Sunset Clock</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Arabic sunset clock with Islamic prayer times and daily Quranic verses. Day resets at sunset according to Islamic tradition.">
+  <meta name="keywords" content="Arabic clock, sunset clock, Islamic prayer times, Quran verses, Muslim prayer, salah times">
+  <meta name="author" content="Nihal PS">
+  <title>Arabic Sunset Clock — Islamic Prayer Times & Daily Quran Verse</title>
+  
+  <!-- SunCalc Library for sunset calculations -->
   <script src="https://cdn.jsdelivr.net/npm/suncalc@1.9.0/suncalc.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/moment-hijri@2.1.2/moment-hijri.min.js"></script>
-
+  
   <style>
-    :root { --primary: #1a73e8; --text: #202124; --gray: #70757a; --border: #dadce0; }
-    body { font-family: 'Segoe UI', Roboto, Arial, sans-serif; background: #fff; color: var(--text); margin: 0; padding: 20px; display: flex; justify-content: center; }
-    .container { max-width: 600px; width: 100%; border: 1px solid var(--border); border-radius: 8px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-    
-    .header { text-align: left; border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-bottom: 15px; }
-    .next-prayer { color: var(--gray); font-size: 14px; margin-bottom: 5px; }
-    .ghurubi-time { font-size: 56px; font-weight: 400; margin: 10px 0; }
-    .hijri-date { color: var(--gray); font-size: 14px; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-    .prayer-table { width: 100%; display: grid; grid-template-columns: repeat(6, 1fr); gap: 2px; text-align: center; margin-top: 20px; border-top: 1px solid var(--border); padding-top: 20px; }
-    .prayer-item { padding: 10px 0; }
-    .p-name { font-size: 13px; font-weight: 700; color: var(--gray); margin-bottom: 8px; }
-    .p-time { font-size: 13px; margin-bottom: 4px; }
-    .p-ghurubi { font-size: 12px; color: var(--primary); font-weight: 600; }
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
 
-    .daily-verse { margin-top: 25px; padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid var(--primary); }
-    .verse-ar { font-size: 20px; direction: rtl; display: block; margin-bottom: 8px; }
-    .verse-en { font-size: 14px; color: #444; font-style: italic; }
+    .clock-container {
+      background: #ffffff;
+      padding: 32px;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      width: 100%;
+      max-width: 650px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .header h1 {
+      font-size: 24px;
+      color: #333;
+      margin-bottom: 8px;
+    }
+
+    .sunset-clock {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .time-display {
+      font-size: 56px;
+      font-weight: 700;
+      color: #667eea;
+      margin-bottom: 8px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .clock-meta {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+
+    select, button {
+      padding: 10px 16px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    select {
+      background: white;
+    }
+
+    button {
+      background: #667eea;
+      color: white;
+      border: none;
+      font-weight: 500;
+    }
+
+    button:hover {
+      background: #5568d3;
+      transform: translateY(-1px);
+    }
+
+    select:hover {
+      border-color: #667eea;
+    }
+
+    .divider {
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #e0e0e0, transparent);
+      margin: 24px 0;
+    }
+
+    .prayer-times {
+      margin-bottom: 24px;
+    }
+
+    .prayer-times h3 {
+      font-size: 20px;
+      margin-bottom: 12px;
+      color: #333;
+      text-align: center;
+    }
+
+    .next-prayer {
+      font-size: 14px;
+      color: #667eea;
+      font-weight: 600;
+      margin-bottom: 16px;
+      text-align: center;
+      padding: 8px;
+      background: #f0f4ff;
+      border-radius: 6px;
+    }
+
+    .prayers-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .prayer-item {
+      text-align: center;
+      padding: 12px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      transition: transform 0.2s;
+    }
+
+    .prayer-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .prayer-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: #555;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .prayer-time {
+      font-size: 18px;
+      color: #667eea;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .prayer-source {
+      font-size: 11px;
+      color: #999;
+      margin-top: 12px;
+      text-align: center;
+    }
+
+    .quran-verse {
+      padding: 20px;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      border-radius: 12px;
+      border-left: 4px solid #667eea;
+    }
+
+    .verse-arabic {
+      font-size: 22px;
+      line-height: 2;
+      color: #2c3e50;
+      margin-bottom: 12px;
+      direction: rtl;
+      text-align: center;
+      font-family: 'Traditional Arabic', 'Scheherazade', 'Arial Unicode MS', Arial, sans-serif;
+    }
+
+    .verse-translation {
+      font-size: 14px;
+      color: #555;
+      font-style: italic;
+      margin-bottom: 8px;
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    .verse-reference {
+      font-size: 12px;
+      color: #667eea;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .loading {
+      text-align: center;
+      color: #999;
+      font-style: italic;
+    }
+
+    .error {
+      background: #fee;
+      color: #c33;
+      padding: 12px;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 14px;
+      margin: 12px 0;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 24px;
+      padding-top: 16px;
+      border-top: 1px solid #e0e0e0;
+    }
+
+    footer p {
+      font-size: 12px;
+      color: #999;
+    }
+
+    footer a {
+      color: #667eea;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 600px) {
+      .time-display {
+        font-size: 42px;
+      }
+
+      .prayers-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .verse-arabic {
+        font-size: 18px;
+      }
+
+      .clock-container {
+        padding: 24px;
+      }
+    }
   </style>
 </head>
 <body>
+  <div class="clock-container">
+    <div class="header">
+      <h1>🌙 Arabic Sunset Clock</h1>
+    </div>
 
-<div class="container">
-  <div class="header">
-    <div id="countdown" class="next-prayer">Requesting location...</div>
-    <div id="ghurubi-clock" class="ghurubi-time">--:--</div>
-    <div id="hijri-display" class="hijri-date">-- --- ----</div>
+    <div class="sunset-clock">
+      <div class="time-display" id="time">--:--</div>
+      <div class="clock-meta" id="meta">Calculating sunset time...</div>
+      <div class="controls">
+        <select id="format" aria-label="Time format">
+          <option value="24">24-Hour Format</option>
+          <option value="12">12-Hour (AM/PM)</option>
+        </select>
+        <button onclick="updateAll()" aria-label="Refresh data">🔄 Refresh</button>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="prayer-times">
+      <h3>🕌 Islamic Prayer Times</h3>
+      <div class="next-prayer" id="nextPrayer">Loading prayer times...</div>
+      <div class="prayers-grid">
+        <div class="prayer-item">
+          <div class="prayer-name">Fajr</div>
+          <div class="prayer-time" id="fajr">--:--</div>
+        </div>
+        <div class="prayer-item">
+          <div class="prayer-name">Sunrise</div>
+          <div class="prayer-time" id="sunrise">--:--</div>
+        </div>
+        <div class="prayer-item">
+          <div class="prayer-name">Dhuhr</div>
+          <div class="prayer-time" id="dhuhr">--:--</div>
+        </div>
+        <div class="prayer-item">
+          <div class="prayer-name">Asr</div>
+          <div class="prayer-time" id="asr">--:--</div>
+        </div>
+        <div class="prayer-item">
+          <div class="prayer-name">Maghrib</div>
+          <div class="prayer-time" id="maghrib">--:--</div>
+        </div>
+        <div class="prayer-item">
+          <div class="prayer-name">Isha</div>
+          <div class="prayer-time" id="isha">--:--</div>
+        </div>
+      </div>
+      <div class="prayer-source">Based on: Umm al-Qura, Makkah calculation method</div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="quran-verse">
+      <div class="verse-arabic" id="verseArabic">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>
+      <div class="verse-translation" id="verseTranslation">Loading daily verse...</div>
+      <div class="verse-reference" id="verseReference"></div>
+    </div>
+
+    <footer>
+      <p>Made with ❤️ by <a href="https://nihalps.in" target="_blank">Nihal PS</a></p>
+      <p style="margin-top: 8px; font-size: 11px;">Prayer times via <a href="https://aladhan.com" target="_blank">Aladhan API</a></p>
+    </footer>
   </div>
 
-  <div id="prayer-grid" class="prayer-table"></div>
-
-  <div class="daily-verse">
-    <span id="q-ar" class="verse-ar"></span>
-    <p id="q-en" class="verse-en"></p>
-  </div>
-</div>
-
-<script>
-  const toAr = (n) => Number(n).toLocaleString('ar-SA');
-  
-  // Authentic content rotation
-  const verses = [
-    { ar: "وَقُل رَّبِّ زِدْنِي عِلْمًا", en: "And say: My Lord, increase me in knowledge. (20:114)" },
-    { ar: "فَاذْكُرُونِي أَذْكُرْكُمْ", en: "So remember Me; I will remember you. (2:152)" }
-  ];
-
-  async function init() {
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        updateUI(pos.coords.latitude, pos.coords.longitude);
-        setInterval(() => updateUI(pos.coords.latitude, pos.coords.longitude), 30000);
-      },
-      () => { document.getElementById('countdown').textContent = "Please enable location access."; }
-    );
-  }
-
-  async function updateUI(lat, lon) {
-    const now = new Date();
-    const sun = SunCalc.getTimes(now, lat, lon);
+  <script>
+    // In-memory storage for format preference
+    let clockFormat = "24";
     
-    // 1. Current Ghurubi Clock
-    let ref = now >= sun.sunset ? sun.sunset : SunCalc.getTimes(new Date(now - 86400000), lat, lon).sunset;
-    const diff = now - ref;
-    const h = Math.floor(diff/3600000) % 24;
-    const m = Math.floor((diff/60000)%60);
-    document.getElementById("ghurubi-clock").textContent = `${toAr(h)}:${toAr(m.toString().padStart(2, '0'))}`;
+    // Initialize format selector
+    const formatSelect = document.getElementById("format");
+    formatSelect.value = clockFormat;
+    formatSelect.addEventListener("change", () => {
+      clockFormat = formatSelect.value;
+      updateSunsetClock();
+    });
 
-    // 2. Hijri Date
-    let hijri = moment();
-    if (now >= sun.sunset) hijri.add(1, 'days');
-    document.getElementById("hijri-display").textContent = hijri.format('iDD iMMMM iYYYY');
+    // Collection of daily Quranic verses
+    const quranVerses = [
+      {
+        arabic: "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
+        translation: "In the name of Allah, the Most Gracious, the Most Merciful",
+        reference: "Surah Al-Fatiha (1:1)"
+      },
+      {
+        arabic: "وَمَا خَلَقْتُ الْجِنَّ وَالْإِنسَ إِلَّا لِيَعْبُدُونِ",
+        translation: "And I did not create the jinn and mankind except to worship Me",
+        reference: "Surah Adh-Dhariyat (51:56)"
+      },
+      {
+        arabic: "فَإِنَّ مَعَ الْعُسْرِ يُسْرًا ۝ إِنَّ مَعَ الْعُسْرِ يُسْرًا",
+        translation: "For indeed, with hardship comes ease. Indeed, with hardship comes ease",
+        reference: "Surah Ash-Sharh (94:5-6)"
+      },
+      {
+        arabic: "رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ",
+        translation: "Our Lord, give us good in this world and good in the Hereafter, and protect us from the punishment of the Fire",
+        reference: "Surah Al-Baqarah (2:201)"
+      },
+      {
+        arabic: "إِنَّ اللَّهَ مَعَ الصَّابِرِينَ",
+        translation: "Indeed, Allah is with the patient",
+        reference: "Surah Al-Baqarah (2:153)"
+      },
+      {
+        arabic: "وَلَا تَيْأَسُوا مِن رَّوْحِ اللَّهِ ۖ إِنَّهُ لَا يَيْأَسُ مِن رَّوْحِ اللَّهِ إِلَّا الْقَوْمُ الْكَافِرُونَ",
+        translation: "And do not despair of the mercy of Allah. Indeed, no one despairs of Allah's mercy except the disbelieving people",
+        reference: "Surah Yusuf (12:87)"
+      },
+      {
+        arabic: "قُلْ هُوَ اللَّهُ أَحَدٌ ۝ اللَّهُ الصَّمَدُ",
+        translation: "Say, He is Allah, [who is] One, Allah, the Eternal Refuge",
+        reference: "Surah Al-Ikhlas (112:1-2)"
+      },
+      {
+        arabic: "رَبِّ اشْرَحْ لِي صَدْرِي ۝ وَيَسِّرْ لِي أَمْرِي",
+        translation: "My Lord, expand for me my breast and ease for me my task",
+        reference: "Surah Ta-Ha (20:25-26)"
+      },
+      {
+        arabic: "وَهُوَ مَعَكُمْ أَيْنَ مَا كُنتُمْ",
+        translation: "And He is with you wherever you are",
+        reference: "Surah Al-Hadid (57:4)"
+      },
+      {
+        arabic: "فَاذْكُرُونِي أَذْكُرْكُمْ وَاشْكُرُوا لِي وَلَا تَكْفُرُونِ",
+        translation: "So remember Me; I will remember you. And be grateful to Me and do not deny Me",
+        reference: "Surah Al-Baqarah (2:152)"
+      }
+    ];
 
-    // 3. Prayer Times (Umm al-Qura Method)
-    const res = await fetch(`https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lon}&method=4`);
-    const data = await res.json();
-    const p = data.data.timings;
-    const names = ['Fajr', 'Sunrise', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+    /**
+     * Get day of year (1-365/366) for verse rotation
+     */
+    function getDayOfYear(date) {
+      const start = new Date(date.getFullYear(), 0, 0);
+      const diff = date - start;
+      const oneDay = 1000 * 60 * 60 * 24;
+      return Math.floor(diff / oneDay);
+    }
 
-    // Countdown Logic
-    let nextName = "", nextDiff = "";
-    for (let name of names) {
-      const [ph, pm] = p[name].split(':');
-      const pDate = new Date(); pDate.setHours(ph, pm, 0);
-      if (pDate > now) {
-        nextName = name;
-        const dMin = Math.round((pDate - now) / 60000);
-        nextDiff = dMin > 60 ? `${Math.floor(dMin/60)}h ${dMin%60}m` : `${dMin}m`;
-        break;
+    /**
+     * Display daily Quranic verse based on current date
+     */
+    function displayDailyVerse() {
+      const dayOfYear = getDayOfYear(new Date());
+      const verse = quranVerses[dayOfYear % quranVerses.length];
+      
+      document.getElementById("verseArabic").textContent = verse.arabic;
+      document.getElementById("verseTranslation").textContent = verse.translation;
+      document.getElementById("verseReference").textContent = verse.reference;
+    }
+
+    /**
+     * Calculate sunset time using SunCalc library
+     */
+    function getSunset(date, lat, lon) {
+      return SunCalc.getTimes(date, lat, lon).sunset;
+    }
+
+    /**
+     * Format time based on 12/24 hour preference
+     */
+    function formatTime(hours, minutes, format) {
+      if (format === "12") {
+        const period = hours >= 12 ? "PM" : "AM";
+        hours = hours % 12 || 12;
+        return `${hours}:${minutes.toString().padStart(2, "0")} ${period}`;
+      }
+      return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+    }
+
+    /**
+     * Fetch Islamic prayer times from Aladhan API
+     * Uses method 4 (Umm al-Qura, Makkah) - same as Google
+     */
+    async function getPrayerTimes(lat, lon) {
+      const today = new Date();
+      const day = today.getDate();
+      const month = today.getMonth() + 1;
+      const year = today.getFullYear();
+      const dateStr = `${day}-${month}-${year}`;
+      
+      // Aladhan API with Umm al-Qura method (method=4)
+      const url = `https://api.aladhan.com/v1/timings/${dateStr}?latitude=${lat}&longitude=${lon}&method=4`;
+      
+      try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('Failed to fetch prayer times');
+        
+        const data = await response.json();
+        return data.data.timings;
+      } catch (error) {
+        console.error("Error fetching prayer times:", error);
+        document.getElementById("nextPrayer").innerHTML = 
+          '<span class="error">Unable to load prayer times. Please check your connection.</span>';
+        return null;
       }
     }
-    document.getElementById("countdown").textContent = `Next prayer: ${nextName} in ${nextDiff}`;
 
-    // 4. Prayer Table with dual times
-    document.getElementById("prayer-grid").innerHTML = names.map(name => {
-      const [ph, pm] = p[name].split(':');
-      const pDate = new Date(); pDate.setHours(ph, pm, 0);
-      let pRef = pDate >= sun.sunset ? sun.sunset : SunCalc.getTimes(new Date(pDate - 86400000), lat, lon).sunset;
-      const pDiff = pDate - pRef;
-      const phAr = Math.floor(pDiff/3600000) % 24;
-      const pmAr = Math.floor((pDiff/60000)%60);
+    /**
+     * Calculate next prayer and time remaining
+     */
+    function getNextPrayer(timings) {
+      const now = new Date();
+      const currentMinutes = now.getHours() * 60 + now.getMinutes();
+      
+      const prayers = [
+        { name: "Fajr", time: timings.Fajr },
+        { name: "Dhuhr", time: timings.Dhuhr },
+        { name: "Asr", time: timings.Asr },
+        { name: "Maghrib", time: timings.Maghrib },
+        { name: "Isha", time: timings.Isha }
+      ];
 
-      return `
-        <div class="prayer-item">
-          <div class="p-name">${name}</div>
-          <div class="p-time">${p[name]}</div>
-          <div class="p-ghurubi">${toAr(phAr)}:${toAr(pmAr.toString().padStart(2, '0'))}</div>
-        </div>`;
-    }).join('');
+      for (let prayer of prayers) {
+        const [h, m] = prayer.time.split(':').map(Number);
+        const prayerMinutes = h * 60 + m;
+        
+        if (prayerMinutes > currentMinutes) {
+          const diff = prayerMinutes - currentMinutes;
+          const hours = Math.floor(diff / 60);
+          const mins = diff % 60;
+          
+          let timeStr = "";
+          if (hours > 0) timeStr += `${hours} hour${hours > 1 ? 's' : ''} `;
+          if (mins > 0) timeStr += `${mins} minute${mins > 1 ? 's' : ''}`;
+          
+          return `Next prayer: ${prayer.name} in ${timeStr.trim()}`;
+        }
+      }
+      
+      return "Next prayer: Fajr tomorrow";
+    }
 
-    // 5. Daily Verse
-    const day = Math.floor(now / 86400000) % verses.length;
-    document.getElementById("q-ar").textContent = verses[day].ar;
-    document.getElementById("q-en").textContent = verses[day].en;
-  }
+    /**
+     * Update sunset clock display
+     */
+    function updateSunsetClock() {
+      navigator.geolocation.getCurrentPosition(
+        pos => {
+          const lat = pos.coords.latitude;
+          const lon = pos.coords.longitude;
+          const now = new Date();
+          
+          // Calculate sunset reference time
+          const sunsetToday = getSunset(now, lat, lon);
+          let refSunset = sunsetToday;
+          
+          // If current time is before today's sunset, use yesterday's sunset
+          if (now < sunsetToday) {
+            const yesterday = new Date(now.getTime() - 86400000);
+            refSunset = getSunset(yesterday, lat, lon);
+          }
+          
+          // Calculate time elapsed since sunset
+          const diffMs = now - refSunset;
+          const diffMinutes = Math.floor(diffMs / 60000);
+          const hours = Math.floor(diffMinutes / 60) % 24;
+          const minutes = diffMinutes % 60;
+          
+          // Update display
+          document.getElementById("time").textContent = 
+            formatTime(hours, minutes, clockFormat);
+          
+          document.getElementById("meta").textContent = 
+            `Sunset reference: ${refSunset.toLocaleTimeString()} | Current: ${now.toLocaleTimeString()}`;
+        },
+        error => {
+          console.error("Geolocation error:", error);
+          document.getElementById("meta").textContent = 
+            "Please enable location access to use this clock";
+        }
+      );
+    }
 
-  init();
-</script>
+    /**
+     * Update prayer times display
+     */
+    async function updatePrayerTimes() {
+      navigator.geolocation.getCurrentPosition(
+        async pos => {
+          const lat = pos.coords.latitude;
+          const lon = pos.coords.longitude;
+          
+          const timings = await getPrayerTimes(lat, lon);
+          
+          if (timings) {
+            // Update prayer time displays
+            document.getElementById("fajr").textContent = timings.Fajr;
+            document.getElementById("sunrise").textContent = timings.Sunrise;
+            document.getElementById("dhuhr").textContent = timings.Dhuhr;
+            document.getElementById("asr").textContent = timings.Asr;
+            document.getElementById("maghrib").textContent = timings.Maghrib;
+            document.getElementById("isha").textContent = timings.Isha;
+            
+            // Update next prayer countdown
+            document.getElementById("nextPrayer").textContent = getNextPrayer(timings);
+          }
+        },
+        error => {
+          console.error("Geolocation error:", error);
+          document.getElementById("nextPrayer").textContent = 
+            "Please enable location access for prayer times";
+        }
+      );
+    }
+
+    /**
+     * Update all components
+     */
+    function updateAll() {
+      displayDailyVerse();
+      updateSunsetClock();
+      updatePrayerTimes();
+    }
+
+    // Initialize on page load
+    updateAll();
+
+    // Auto-update every minute
+    setInterval(() => {
+      updateSunsetClock();
+      updatePrayerTimes();
+    }, 60000);
+  </script>
 </body>
 </html>
