@@ -2,46 +2,103 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Arabic Sunset Clock — Ghurubi Time</title>
+  <title>Arabic Sunset Clock</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="manifest" href="manifest.json">
   <script src="https://cdn.jsdelivr.net/npm/suncalc@1.9.0/suncalc.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/moment-hijri@2.1.2/moment-hijri.min.js"></script>
 
   <style>
-    :root { --primary: #1a73e8; --text: #202124; --border: #dadce0; }
+    :root { --primary: #1a73e8; --text: #202124; --gray: #70757a; --border: #dadce0; }
     body { font-family: 'Segoe UI', Roboto, Arial, sans-serif; background: #fff; color: var(--text); margin: 0; padding: 20px; display: flex; justify-content: center; }
-    .container { max-width: 500px; width: 100%; border: 1px solid var(--border); border-radius: 8px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .container { max-width: 600px; width: 100%; border: 1px solid var(--border); border-radius: 8px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
     
-    .ghurubi-card { text-align: center; border-bottom: 1px solid var(--border); padding-bottom: 20px; margin-bottom: 20px; }
-    .hijri-date { color: #70757a; font-size: 14px; }
-    .time-main { font-size: 64px; font-weight: 500; margin: 15px 0; letter-spacing: -2px; }
+    .header { text-align: left; border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-bottom: 15px; }
+    .next-prayer { color: var(--gray); font-size: 14px; margin-bottom: 5px; }
+    .ghurubi-time { font-size: 56px; font-weight: 400; margin: 10px 0; }
+    .hijri-date { color: var(--gray); font-size: 14px; }
+
+    .prayer-table { width: 100%; display: grid; grid-template-columns: repeat(6, 1fr); gap: 2px; text-align: center; margin-top: 20px; border-top: 1px solid var(--border); padding-top: 20px; }
+    .prayer-item { padding: 10px 0; }
+    .p-name { font-size: 13px; font-weight: 700; color: var(--gray); margin-bottom: 8px; }
+    .p-time { font-size: 13px; margin-bottom: 4px; }
+    .p-ghurubi { font-size: 12px; color: var(--primary); font-weight: 600; }
     
-    .prayer-table { width: 100%; display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; text-align: center; margin-top: 20px; }
-    .prayer-item { padding: 12px 4px; border-radius: 4px; background: #f8f9fa; border: 1px solid transparent; }
-    .prayer-name { font-size: 11px; font-weight: 700; color: #70757a; margin-bottom: 6px; text-transform: uppercase; }
-    .prayer-time { font-size: 12px; font-weight: 500; }
-
-    .daily-box { margin-top: 25px; padding: 15px; background: #fdfdfd; border-radius: 8px; border-left: 4px solid var(--primary); }
-    .verse-title { font-size: 13px; color: var(--primary); font-weight: 700; text-transform: uppercase; margin-bottom: 8px; }
-    .arabic-text { font-size: 22px; direction: rtl; display: block; margin-bottom: 8px; line-height: 1.6; }
-    .english-text { font-size: 14px; color: #444; line-height: 1.4; }
-
-    .controls { margin-top: 20px; display: flex; gap: 8px; }
-    select { flex: 1; padding: 10px; border-radius: 4px; border: 1px solid var(--border); background: #fff; font-size: 14px; }
+    .loading { color: orange; font-weight: bold; }
   </style>
 </head>
 <body>
 
 <div class="container">
-  <div class="ghurubi-card">
-    <div id="hijri" class="hijri-date">-- --- ----</div>
-    <div id="time" class="time-main">--:--</div>
-    <div id="status" style="font-size: 13px; color: #1e8e3e; font-weight: 500;">Calculating Sunset...</div>
+  <div class="header">
+    <div id="countdown" class="next-prayer">Detecting location...</div>
+    <div id="ghurubi-clock" class="ghurubi-time">--:--</div>
+    <div id="hijri-display" class="hijri-date">-- --- ----</div>
   </div>
 
-  <div class="prayer-table" id="prayer-list"></div>
+  <div class="prayer-table" id="prayer-grid">
+    </div>
+</div>
 
-  <div class="daily-box">
-    <div class="verse-title">Daily Quranic Verse</div>
-    <span id="q-ar" class="arabic-text
+<script>
+  const toAr = (n) => Number(n).toLocaleString('ar-SA');
+
+  async function init() {
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const lat = pos.coords.latitude;
+        const lon = pos.coords.longitude;
+        updateUI(lat, lon);
+        setInterval(() => updateUI(lat, lon), 30000);
+      },
+      (err) => {
+        document.getElementById('countdown').textContent = "Error: Please allow location access.";
+      }
+    );
+  }
+
+  async function updateUI(lat, lon) {
+    const now = new Date();
+    const sun = SunCalc.getTimes(now, lat, lon);
+    
+    // 1. Calculate Ghurubi Time (12:00 at Sunset)
+    let ref = now >= sun.sunset ? sun.sunset : SunCalc.getTimes(new Date(now - 86400000), lat, lon).sunset;
+    const diff = now - ref;
+    const h = Math.floor(diff/3600000) % 24;
+    const m = Math.floor((diff/60000)%60);
+    document.getElementById("ghurubi-clock").textContent = `${toAr(h)}:${toAr(m.toString().padStart(2, '0'))}`;
+
+    // 2. Hijri Date
+    let hijri = moment();
+    if (now >= sun.sunset) hijri.add(1, 'days');
+    document.getElementById("hijri-display").textContent = hijri.format('iDD iMMMM iYYYY');
+
+    // 3. Prayer Times & Countdown
+    const res = await fetch(`https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lon}&method=4`);
+    const data = await res.json();
+    const p = data.data.timings;
+    const names = ['Fajr', 'Sunrise', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+
+    // Find next prayer for countdown
+    let nextName = "";
+    let nextDiff = "";
+    for (let name of names) {
+      const [ph, pm] = p[name].split(':');
+      const pDate = new Date(); pDate.setHours(ph, pm, 0);
+      if (pDate > now) {
+        nextName = name;
+        const diffMin = Math.round((pDate - now) / 60000);
+        nextDiff = diffMin > 60 ? `${Math.floor(diffMin/60)}h ${diffMin%60}m` : `${diffMin}m`;
+        break;
+      }
+    }
+    document.getElementById("countdown").textContent = `Next prayer: ${nextName} in ${nextDiff}`;
+
+    // 4. Populate Table (Local Time vs Arabic Time)
+    document.getElementById("prayer-grid").innerHTML = names.map(name => {
+      const [ph, pm] = p[name].split(':');
+      const pDate = new Date(); pDate.setHours(ph, pm, 0);
+      
+      // Calculate Arabic time for each prayer
+      let pRef = pDate >= sun.sunset ? sun.sunset : SunCalc.getTimes(new Date(pDate - 86400000), lat, lon).sunset;
+      const pDiff = pDate - pRef;
+      const phAr = Math.floor(pDiff/3600
