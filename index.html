@@ -22,37 +22,45 @@
     .p-name { font-size: 13px; font-weight: 700; color: var(--gray); margin-bottom: 8px; }
     .p-time { font-size: 13px; margin-bottom: 4px; }
     .p-ghurubi { font-size: 12px; color: var(--primary); font-weight: 600; }
-    
-    .loading { color: orange; font-weight: bold; }
+
+    .daily-verse { margin-top: 25px; padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid var(--primary); }
+    .verse-ar { font-size: 20px; direction: rtl; display: block; margin-bottom: 8px; }
+    .verse-en { font-size: 14px; color: #444; font-style: italic; }
   </style>
 </head>
 <body>
 
 <div class="container">
   <div class="header">
-    <div id="countdown" class="next-prayer">Detecting location...</div>
+    <div id="countdown" class="next-prayer">Requesting location...</div>
     <div id="ghurubi-clock" class="ghurubi-time">--:--</div>
     <div id="hijri-display" class="hijri-date">-- --- ----</div>
   </div>
 
-  <div class="prayer-table" id="prayer-grid">
-    </div>
+  <div id="prayer-grid" class="prayer-table"></div>
+
+  <div class="daily-verse">
+    <span id="q-ar" class="verse-ar"></span>
+    <p id="q-en" class="verse-en"></p>
+  </div>
 </div>
 
 <script>
   const toAr = (n) => Number(n).toLocaleString('ar-SA');
+  
+  // Authentic content rotation
+  const verses = [
+    { ar: "وَقُل رَّبِّ زِدْنِي عِلْمًا", en: "And say: My Lord, increase me in knowledge. (20:114)" },
+    { ar: "فَاذْكُرُونِي أَذْكُرْكُمْ", en: "So remember Me; I will remember you. (2:152)" }
+  ];
 
   async function init() {
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
-        const lat = pos.coords.latitude;
-        const lon = pos.coords.longitude;
-        updateUI(lat, lon);
-        setInterval(() => updateUI(lat, lon), 30000);
+        updateUI(pos.coords.latitude, pos.coords.longitude);
+        setInterval(() => updateUI(pos.coords.latitude, pos.coords.longitude), 30000);
       },
-      (err) => {
-        document.getElementById('countdown').textContent = "Error: Please allow location access.";
-      }
+      () => { document.getElementById('countdown').textContent = "Please enable location access."; }
     );
   }
 
@@ -60,7 +68,7 @@
     const now = new Date();
     const sun = SunCalc.getTimes(now, lat, lon);
     
-    // 1. Calculate Ghurubi Time (12:00 at Sunset)
+    // 1. Current Ghurubi Clock
     let ref = now >= sun.sunset ? sun.sunset : SunCalc.getTimes(new Date(now - 86400000), lat, lon).sunset;
     const diff = now - ref;
     const h = Math.floor(diff/3600000) % 24;
@@ -72,33 +80,50 @@
     if (now >= sun.sunset) hijri.add(1, 'days');
     document.getElementById("hijri-display").textContent = hijri.format('iDD iMMMM iYYYY');
 
-    // 3. Prayer Times & Countdown
+    // 3. Prayer Times (Umm al-Qura Method)
     const res = await fetch(`https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lon}&method=4`);
     const data = await res.json();
     const p = data.data.timings;
     const names = ['Fajr', 'Sunrise', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
 
-    // Find next prayer for countdown
-    let nextName = "";
-    let nextDiff = "";
+    // Countdown Logic
+    let nextName = "", nextDiff = "";
     for (let name of names) {
       const [ph, pm] = p[name].split(':');
       const pDate = new Date(); pDate.setHours(ph, pm, 0);
       if (pDate > now) {
         nextName = name;
-        const diffMin = Math.round((pDate - now) / 60000);
-        nextDiff = diffMin > 60 ? `${Math.floor(diffMin/60)}h ${diffMin%60}m` : `${diffMin}m`;
+        const dMin = Math.round((pDate - now) / 60000);
+        nextDiff = dMin > 60 ? `${Math.floor(dMin/60)}h ${dMin%60}m` : `${dMin}m`;
         break;
       }
     }
     document.getElementById("countdown").textContent = `Next prayer: ${nextName} in ${nextDiff}`;
 
-    // 4. Populate Table (Local Time vs Arabic Time)
+    // 4. Prayer Table with dual times
     document.getElementById("prayer-grid").innerHTML = names.map(name => {
       const [ph, pm] = p[name].split(':');
       const pDate = new Date(); pDate.setHours(ph, pm, 0);
-      
-      // Calculate Arabic time for each prayer
       let pRef = pDate >= sun.sunset ? sun.sunset : SunCalc.getTimes(new Date(pDate - 86400000), lat, lon).sunset;
       const pDiff = pDate - pRef;
-      const phAr = Math.floor(pDiff/3600
+      const phAr = Math.floor(pDiff/3600000) % 24;
+      const pmAr = Math.floor((pDiff/60000)%60);
+
+      return `
+        <div class="prayer-item">
+          <div class="p-name">${name}</div>
+          <div class="p-time">${p[name]}</div>
+          <div class="p-ghurubi">${toAr(phAr)}:${toAr(pmAr.toString().padStart(2, '0'))}</div>
+        </div>`;
+    }).join('');
+
+    // 5. Daily Verse
+    const day = Math.floor(now / 86400000) % verses.length;
+    document.getElementById("q-ar").textContent = verses[day].ar;
+    document.getElementById("q-en").textContent = verses[day].en;
+  }
+
+  init();
+</script>
+</body>
+</html>
