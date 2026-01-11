@@ -2,108 +2,129 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Arabic Sunset Clock — Sunset = 12:00</title>
-  <meta name="description" content="Live Arabic clock where sunset shows as 12:00. Location-based, PWA-ready." />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Live Arabic sunset clock where the day resets at sunset. Toggle between 24-hour and AM/PM formats." />
   <script src="https://cdn.jsdelivr.net/npm/suncalc@1.9.0/suncalc.js"></script>
+
   <style>
-    body{font-family:system-ui,Segoe UI,Roboto,Arial;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;background:#f7f7fb}
-    .clock{background:#fff;padding:28px;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,.08);text-align:center}
-    .time{font-size:48px;font-weight:600}
-    .meta{color:#666;margin-top:8px;font-size:14px}
-    button{margin-top:10px;padding:8px 12px;border:0;border-radius:8px;background:#0070f3;color:#fff;cursor:pointer}
+    body {
+      font-family: system-ui, Segoe UI, Roboto, Arial;
+      background: #f5f7fb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .clock {
+      background: #fff;
+      padding: 28px;
+      border-radius: 14px;
+      box-shadow: 0 10px 24px rgba(0,0,0,.08);
+      text-align: center;
+      width: 320px;
+    }
+    .time {
+      font-size: 48px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .meta {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 14px;
+    }
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    select, button {
+      padding: 6px 10px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      cursor: pointer;
+    }
+    button {
+      background: #0070f3;
+      color: #fff;
+      border: none;
+    }
   </style>
 </head>
+
 <body>
   <div class="clock">
-    <div id="arabicTime" class="time">--:--</div>
-    <div id="sunInfo" class="meta">locating…</div>
-    <button id="refresh">Refresh</button>
+    <div class="time" id="time">--:--</div>
+
+    <div class="meta" id="meta"></div>
+
+    <div class="controls">
+      <select id="format">
+        <option value="24">24-Hour</option>
+        <option value="12">AM / PM</option>
+      </select>
+      <button onclick="updateClock()">Refresh</button>
+    </div>
   </div>
 
 <script>
-const elTime = document.getElementById('arabicTime');
-const elMeta = document.getElementById('sunInfo');
+  const formatSelect = document.getElementById("format");
 
-async function fetchSunTimesFromAPI(lat,lng,dateStr){
-  // optional fallback: sunrise-sunset.org JSON (no key, attribution required)
-  const res = await fetch(`https://api.sunrise-sunset.org/json?lat=${lat}&lng=${lng}&date=${dateStr}&formatted=0`);
-  const j = await res.json();
-  if(j.status === 'OK') return {sunset: new Date(j.results.sunset)};
-  throw new Error('API sunset fail');
-}
+  // Load saved preference
+  const savedFormat = localStorage.getItem("clockFormat") || "24";
+  formatSelect.value = savedFormat;
 
-function computeArabicTime(now, sunsetRef){
-  // If now is before this day's sunsetRef, use previous day's sunset
-  if(now < sunsetRef){
-    const prev = new Date(sunsetRef.getTime() - 24*60*60*1000);
-    // compute sunset for prev day using SunCalc if you have lat/lng
-    // but here assume sunsetRef was today's; if now < sunsetRef we'll use prev sunset passed in by caller
+  formatSelect.addEventListener("change", () => {
+    localStorage.setItem("clockFormat", formatSelect.value);
+    updateClock();
+  });
+
+  function getSunset(date, lat, lon) {
+    return SunCalc.getTimes(date, lat, lon).sunset;
   }
-  // delta from reference sunset in milliseconds
-  let delta = now.getTime() - sunsetRef.getTime();
-  if(delta < 0){
-    // use previous day's sunset: subtract 24h
-    delta += 24*60*60*1000;
-  }
-  const totalMinutes = Math.floor(delta/60000);
-  const hours = Math.floor(totalMinutes/60);
-  const minutes = totalMinutes % 60;
-  // Arabic clock: sunset = 12:00. So map hours offset -> display hour:
-  let displayHour = (12 + hours) % 12;
-  if(displayHour === 0) displayHour = 12;
-  return `${String(displayHour).padStart(2,'0')}:${String(minutes).padStart(2,'0')}`;
-}
 
-async function updateClock(lat, lng){
-  try{
-    const now = new Date();
-    // Use SunCalc to get today's sunset
-    const times = SunCalc.getTimes(now, lat, lng);
-    let sunset = times.sunset;
-    // If SunCalc returned invalid, fallback to API
-    if(!sunset || isNaN(sunset.getTime())){
-      const r = await fetchSunTimesFromAPI(lat,lng, now.toISOString().slice(0,10));
-      sunset = r.sunset;
+  function formatTime(hours, minutes, format) {
+    if (format === "12") {
+      const ampm = hours >= 12 ? "PM" : "AM";
+      hours = hours % 12 || 12;
+      return `${hours}:${minutes.toString().padStart(2,"0")} ${ampm}`;
     }
-    // If now is before today's sunset we need previous day's sunset as ref for Arabic day start.
-    let refSunset = sunset;
-    if(now < sunset){
-      const yesterday = new Date(now.getTime() - 24*60*60*1000);
-      const prevTimes = SunCalc.getTimes(yesterday, lat, lng);
-      refSunset = prevTimes.sunset && !isNaN(prevTimes.sunset.getTime()) ? prevTimes.sunset : new Date(sunset.getTime() - 24*60*60*1000);
-    }
-    elTime.textContent = computeArabicTime(now, refSunset);
-    elMeta.textContent = `Sunset reference: ${refSunset.toLocaleString()}  — local time: ${now.toLocaleString()}`;
-  }catch(e){
-    elTime.textContent = '--:--';
-    elMeta.textContent = 'Error calculating sunset — ' + e.message;
+    return `${hours.toString().padStart(2,"0")}:${minutes.toString().padStart(2,"0")}`;
   }
-}
 
-async function init(){
-  // Try browser geolocation first
-  if(navigator.geolocation){
+  function updateClock() {
     navigator.geolocation.getCurrentPosition(pos => {
-      updateClock(pos.coords.latitude, pos.coords.longitude);
-    }, async err => {
-      // fallback: IP geolocation via ipinfo (lite) - optional, no key needed for basic
-      try{
-        const ipr = await fetch('https://ipinfo.io/json?token='); // you can add token or use free endpoints
-        const j = await ipr.json();
-        const [lat,lng] = j.loc.split(',');
-        updateClock(parseFloat(lat), parseFloat(lng));
-      }catch(e){
-        elMeta.textContent = 'Location denied and IP fallback failed.';
-      }
-    }, {timeout:10000});
-  } else {
-    elMeta.textContent = 'No geolocation available';
-  }
-}
+      const lat = pos.coords.latitude;
+      const lon = pos.coords.longitude;
 
-document.getElementById('refresh').addEventListener('click', init);
-init();
+      const now = new Date();
+      const sunsetToday = getSunset(now, lat, lon);
+
+      let refSunset = sunsetToday;
+      if (now < sunsetToday) {
+        refSunset = getSunset(new Date(now - 86400000), lat, lon);
+      }
+
+      const diffMs = now - refSunset;
+      const diffMinutes = Math.floor(diffMs / 60000);
+
+      let hours = Math.floor(diffMinutes / 60) % 24;
+      let minutes = diffMinutes % 60;
+
+      const format = formatSelect.value;
+      document.getElementById("time").textContent =
+        formatTime(hours, minutes, format);
+
+      document.getElementById("meta").textContent =
+        `Sunset reference: ${refSunset.toLocaleString()} — Local time: ${now.toLocaleString()}`;
+    });
+  }
+
+  updateClock();
+  setInterval(updateClock, 60000);
 </script>
 </body>
 </html>
