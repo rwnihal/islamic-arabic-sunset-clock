@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Arabic Sunset Clock — Sunset = 12:00</title>
+  <meta name="description" content="Live Arabic clock where sunset shows as 12:00. Location-based, PWA-ready." />
+  <script src="https://cdn.jsdelivr.net/npm/suncalc@1.9.0/suncalc.js"></script>
+  <style>
+    body{font-family:system-ui,Segoe UI,Roboto,Arial;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;background:#f7f7fb}
+    .clock{background:#fff;padding:28px;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,.08);text-align:center}
+    .time{font-size:48px;font-weight:600}
+    .meta{color:#666;margin-top:8px;font-size:14px}
+    button{margin-top:10px;padding:8px 12px;border:0;border-radius:8px;background:#0070f3;color:#fff;cursor:pointer}
+  </style>
+</head>
+<body>
+  <div class="clock">
+    <div id="arabicTime" class="time">--:--</div>
+    <div id="sunInfo" class="meta">locating…</div>
+    <button id="refresh">Refresh</button>
+  </div>
+
+<script>
+const elTime = document.getElementById('arabicTime');
+const elMeta = document.getElementById('sunInfo');
+
+async function fetchSunTimesFromAPI(lat,lng,dateStr){
+  // optional fallback: sunrise-sunset.org JSON (no key, attribution required)
+  const res = await fetch(`https://api.sunrise-sunset.org/json?lat=${lat}&lng=${lng}&date=${dateStr}&formatted=0`);
+  const j = await res.json();
+  if(j.status === 'OK') return {sunset: new Date(j.results.sunset)};
+  throw new Error('API sunset fail');
+}
+
+function computeArabicTime(now, sunsetRef){
+  // If now is before this day's sunsetRef, use previous day's sunset
+  if(now < sunsetRef){
+    const prev = new Date(sunsetRef.getTime() - 24*60*60*1000);
+    // compute sunset for prev day using SunCalc if you have lat/lng
+    // but here assume sunsetRef was today's; if now < sunsetRef we'll use prev sunset passed in by caller
+  }
+  // delta from reference sunset in milliseconds
+  let delta = now.getTime() - sunsetRef.getTime();
+  if(delta < 0){
+    // use previous day's sunset: subtract 24h
+    delta += 24*60*60*1000;
+  }
+  const totalMinutes = Math.floor(delta/60000);
+  const hours = Math.floor(totalMinutes/60);
+  const minutes = totalMinutes % 60;
+  // Arabic clock: sunset = 12:00. So map hours offset -> display hour:
+  let displayHour = (12 + hours) % 12;
+  if(displayHour === 0) displayHour = 12;
+  return `${String(displayHour).padStart(2,'0')}:${String(minutes).padStart(2,'0')}`;
+}
+
+async function updateClock(lat, lng){
+  try{
+    const now = new Date();
+    // Use SunCalc to get today's sunset
+    const times = SunCalc.getTimes(now, lat, lng);
+    let sunset = times.sunset;
+    // If SunCalc returned invalid, fallback to API
+    if(!sunset || isNaN(sunset.getTime())){
+      const r = await fetchSunTimesFromAPI(lat,lng, now.toISOString().slice(0,10));
+      sunset = r.sunset;
+    }
+    // If now is before today's sunset we need previous day's sunset as ref for Arabic day start.
+    let refSunset = sunset;
+    if(now < sunset){
+      const yesterday = new Date(now.getTime() - 24*60*60*1000);
+      const prevTimes = SunCalc.getTimes(yesterday, lat, lng);
+      refSunset = prevTimes.sunset && !isNaN(prevTimes.sunset.getTime()) ? prevTimes.sunset : new Date(sunset.getTime() - 24*60*60*1000);
+    }
+    elTime.textContent = computeArabicTime(now, refSunset);
+    elMeta.textContent = `Sunset reference: ${refSunset.toLocaleString()}  — local time: ${now.toLocaleString()}`;
+  }catch(e){
+    elTime.textContent = '--:--';
+    elMeta.textContent = 'Error calculating sunset — ' + e.message;
+  }
+}
+
+async function init(){
+  // Try browser geolocation first
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(pos => {
+      updateClock(pos.coords.latitude, pos.coords.longitude);
+    }, async err => {
+      // fallback: IP geolocation via ipinfo (lite) - optional, no key needed for basic
+      try{
+        const ipr = await fetch('https://ipinfo.io/json?token='); // you can add token or use free endpoints
+        const j = await ipr.json();
+        const [lat,lng] = j.loc.split(',');
+        updateClock(parseFloat(lat), parseFloat(lng));
+      }catch(e){
+        elMeta.textContent = 'Location denied and IP fallback failed.';
+      }
+    }, {timeout:10000});
+  } else {
+    elMeta.textContent = 'No geolocation available';
+  }
+}
+
+document.getElementById('refresh').addEventListener('click', init);
+init();
+</script>
+</body>
+</html>
