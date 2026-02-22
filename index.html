@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Arabic sunset clock with Hijri calendar, Islamic prayer times in both local and sunset time, Ramadan countdown, and Sunnah fasting reminders.">
-  <meta name="keywords" content="Arabic clock, sunset clock, Islamic prayer times, Hijri calendar, Ramadan countdown, Sunnah fasting">
+  <meta name="description" content="Arabic sunset clock with Hijri calendar, Islamic prayer times, Qibla finder, Ramadan tracker, and Sunnah prayer calculator.">
+  <meta name="keywords" content="Arabic clock, sunset clock, Islamic prayer times, Hijri calendar, Ramadan countdown, Qibla finder, Sunnah prayers">
   <meta name="author" content="Nihal PS">
   <title>Arabic Sunset Clock — Islamic Calendar & Prayer Times</title>
   
@@ -47,26 +47,47 @@
       margin-bottom: 8px;
     }
 
-    .hijri-date {
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      color: white;
-      padding: 16px;
-      border-radius: 12px;
-      text-align: center;
+    .dual-calendar {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
       margin-bottom: 24px;
     }
 
-    .hijri-date h2 {
-      font-size: 28px;
+    .calendar-card {
+      padding: 16px;
+      border-radius: 12px;
+      text-align: center;
+    }
+
+    .hijri-calendar {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+    }
+
+    .gregorian-calendar {
+      background: linear-gradient(135deg, #48c6ef, #6f86d6);
+      color: white;
+    }
+
+    .calendar-card h3 {
+      font-size: 14px;
+      opacity: 0.9;
+      margin-bottom: 8px;
+    }
+
+    .calendar-card .date {
+      font-size: 20px;
+      font-weight: 700;
       margin-bottom: 4px;
     }
 
-    .hijri-date p {
-      font-size: 14px;
-      opacity: 0.9;
+    .calendar-card .day {
+      font-size: 13px;
+      opacity: 0.85;
     }
 
-    .ramadan-counter {
+    .ramadan-info {
       background: #fff3cd;
       border-left: 4px solid #ffc107;
       padding: 16px;
@@ -75,16 +96,262 @@
       text-align: center;
     }
 
-    .ramadan-counter h3 {
+    .ramadan-info h3 {
       font-size: 18px;
       color: #856404;
       margin-bottom: 8px;
     }
 
-    .ramadan-counter .days {
-      font-size: 32px;
-      font-weight: 700;
+    .ramadan-info .message {
+      font-size: 16px;
       color: #856404;
+      margin-top: 8px;
+    }
+
+    .fasting-tracker {
+      background: linear-gradient(135deg, #ffeaa7, #fdcb6e);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 24px;
+      display: none;
+    }
+
+    .fasting-tracker.active {
+      display: block;
+    }
+
+    .fasting-tracker h3 {
+      text-align: center;
+      color: #d63031;
+      font-size: 18px;
+      margin-bottom: 16px;
+    }
+
+    .sun-tracker {
+      position: relative;
+      height: 120px;
+      margin-bottom: 16px;
+    }
+
+    .sun-path {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: #dfe6e9;
+      border-radius: 3px;
+    }
+
+    .sun-progress {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #fdcb6e, #e17055);
+      border-radius: 3px;
+      transition: width 0.3s;
+    }
+
+    .sun-icon {
+      position: absolute;
+      bottom: -10px;
+      font-size: 32px;
+      transition: left 0.3s;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    .fasting-times {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 12px;
+      font-size: 13px;
+      color: #2d3436;
+    }
+
+    .fasting-time {
+      text-align: center;
+    }
+
+    .fasting-time-label {
+      font-weight: 600;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .fasting-status {
+      text-align: center;
+      font-size: 14px;
+      color: #d63031;
+      font-weight: 600;
+      margin-top: 12px;
+      padding: 8px;
+      background: rgba(255, 255, 255, 0.5);
+      border-radius: 6px;
+    }
+
+    .quran-khatam {
+      background: linear-gradient(135deg, #a8e6cf, #81c784);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+
+    .quran-khatam h3 {
+      text-align: center;
+      color: #1b5e20;
+      font-size: 18px;
+      margin-bottom: 16px;
+    }
+
+    .khatam-selector {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .khatam-btn {
+      padding: 10px 20px;
+      border: 2px solid #2e7d32;
+      background: white;
+      color: #2e7d32;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .khatam-btn.active {
+      background: #2e7d32;
+      color: white;
+    }
+
+    .khatam-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .khatam-plan {
+      background: white;
+      padding: 16px;
+      border-radius: 8px;
+      margin-top: 12px;
+    }
+
+    .khatam-instruction {
+      font-size: 14px;
+      color: #1b5e20;
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+
+    .khatam-prayer-times {
+      display: grid;
+      gap: 8px;
+    }
+
+    .khatam-prayer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 12px;
+      background: #f1f8e9;
+      border-radius: 6px;
+      font-size: 13px;
+    }
+
+    .khatam-prayer-name {
+      font-weight: 600;
+      color: #33691e;
+    }
+
+    .khatam-pages {
+      color: #558b2f;
+      font-weight: 600;
+    }
+
+    .qibla-finder {
+      background: linear-gradient(135deg, #e0c3fc, #8ec5fc);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+
+    .qibla-finder h3 {
+      color: #4a148c;
+      font-size: 18px;
+      margin-bottom: 16px;
+    }
+
+    .compass-container {
+      position: relative;
+      width: 200px;
+      height: 200px;
+      margin: 0 auto 16px;
+      background: white;
+      border-radius: 50%;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .compass {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      position: relative;
+      background: radial-gradient(circle, #fff 30%, #f0f0f0 100%);
+    }
+
+    .compass-needle {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 4px;
+      height: 80px;
+      background: linear-gradient(to bottom, #e74c3c 50%, #95a5a6 50%);
+      transform-origin: center bottom;
+      transform: translate(-50%, -100%) rotate(0deg);
+      transition: transform 0.5s ease;
+      border-radius: 2px;
+    }
+
+    .compass-center {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 12px;
+      height: 12px;
+      background: #2c3e50;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 10;
+    }
+
+    .compass-directions {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 16px;
+      font-weight: 700;
+      color: #e74c3c;
+    }
+
+    .qibla-info {
+      font-size: 14px;
+      color: #4a148c;
+    }
+
+    .qibla-info strong {
+      display: block;
+      font-size: 24px;
+      margin: 8px 0;
     }
 
     .sunset-clock {
@@ -224,6 +491,45 @@
       text-align: center;
     }
 
+    .sunnah-prayers {
+      background: #fff8e1;
+      border-left: 4px solid #ffa726;
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 24px;
+    }
+
+    .sunnah-prayers h3 {
+      font-size: 18px;
+      color: #e65100;
+      margin-bottom: 12px;
+    }
+
+    .sunnah-prayer-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .sunnah-prayer-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px;
+      background: white;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    .sunnah-prayer-name {
+      font-weight: 600;
+      color: #333;
+    }
+
+    .sunnah-prayer-time {
+      color: #f57c00;
+      font-weight: 600;
+    }
+
     .sunnah-fasting {
       background: #e7f3ff;
       border-left: 4px solid #2196f3;
@@ -360,12 +666,22 @@
         grid-template-columns: repeat(2, 1fr);
       }
 
-      .hijri-date h2 {
-        font-size: 22px;
+      .dual-calendar {
+        grid-template-columns: 1fr;
       }
 
       .clock-container {
         padding: 24px;
+      }
+
+      .khatam-btn {
+        padding: 8px 16px;
+        font-size: 13px;
+      }
+
+      .compass-container {
+        width: 160px;
+        height: 160px;
       }
     }
   </style>
@@ -376,15 +692,92 @@
       <h1>🌙 Arabic Sunset Clock</h1>
     </div>
 
-    <div class="hijri-date">
-      <h2 id="hijriDate">Loading Hijri Date...</h2>
-      <p id="gregorianDate"></p>
+    <div class="dual-calendar">
+      <div class="calendar-card hijri-calendar">
+        <h3>Islamic Calendar</h3>
+        <div class="date" id="hijriDateFull">Loading...</div>
+        <div class="day" id="hijriDay"></div>
+      </div>
+      <div class="calendar-card gregorian-calendar">
+        <h3>Gregorian Calendar</h3>
+        <div class="date" id="gregorianDateFull">Loading...</div>
+        <div class="day" id="gregorianDay"></div>
+      </div>
     </div>
 
-    <div class="ramadan-counter" id="ramadanCounter">
-      <h3>🌙 Ramadan Countdown</h3>
-      <div class="days" id="ramadanDays">--</div>
-      <p id="ramadanText">days remaining</p>
+    <div class="ramadan-info" id="ramadanInfo">
+      <h3>🌙 Ramadan</h3>
+      <div class="message" id="ramadanMessage">Calculating...</div>
+    </div>
+
+    <div class="fasting-tracker" id="fastingTracker">
+      <h3>☀️ Today's Fasting Progress</h3>
+      <div class="sun-tracker">
+        <div class="sun-path"></div>
+        <div class="sun-progress" id="sunProgress"></div>
+        <div class="sun-icon" id="sunIcon">☀️</div>
+      </div>
+      <div class="fasting-times">
+        <div class="fasting-time">
+          <span class="fasting-time-label">Fajr (Start)</span>
+          <span id="fastingStart">--:--</span>
+        </div>
+        <div class="fasting-time">
+          <span class="fasting-time-label">Maghrib (End)</span>
+          <span id="fastingEnd">--:--</span>
+        </div>
+      </div>
+      <div class="fasting-status" id="fastingStatus">Calculating...</div>
+    </div>
+
+    <div class="quran-khatam">
+      <h3>📖 Quran Khatam Calculator</h3>
+      <div class="khatam-selector">
+        <button class="khatam-btn active" onclick="selectKhatam(1)">1x Complete</button>
+        <button class="khatam-btn" onclick="selectKhatam(2)">2x Complete</button>
+        <button class="khatam-btn" onclick="selectKhatam(3)">3x Complete</button>
+      </div>
+      <div class="khatam-plan" id="khatamPlan">
+        <div class="khatam-instruction">Read <strong>4 pages</strong> after each prayer to complete Quran once in Ramadan (30 days)</div>
+        <div class="khatam-prayer-times">
+          <div class="khatam-prayer">
+            <span class="khatam-prayer-name">After Fajr</span>
+            <span class="khatam-pages">4 pages</span>
+          </div>
+          <div class="khatam-prayer">
+            <span class="khatam-prayer-name">After Dhuhr</span>
+            <span class="khatam-pages">4 pages</span>
+          </div>
+          <div class="khatam-prayer">
+            <span class="khatam-prayer-name">After Asr</span>
+            <span class="khatam-pages">4 pages</span>
+          </div>
+          <div class="khatam-prayer">
+            <span class="khatam-prayer-name">After Maghrib</span>
+            <span class="khatam-pages">4 pages</span>
+          </div>
+          <div class="khatam-prayer">
+            <span class="khatam-prayer-name">After Isha</span>
+            <span class="khatam-pages">4 pages</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="qibla-finder">
+      <h3>🕋 Qibla Direction</h3>
+      <div class="compass-container">
+        <div class="compass">
+          <div class="compass-directions">N</div>
+          <div class="compass-needle" id="compassNeedle"></div>
+          <div class="compass-center"></div>
+        </div>
+      </div>
+      <div class="qibla-info">
+        <div>Qibla Direction</div>
+        <strong id="qiblaDirection">--°</strong>
+        <div id="qiblaLocation">Calculating...</div>
+      </div>
     </div>
 
     <div class="sunset-clock">
@@ -410,18 +803,25 @@
 
     <div class="divider"></div>
 
+    <div class="sunnah-prayers">
+      <h3>🌟 Sunnah Prayer Times</h3>
+      <div class="sunnah-prayer-list" id="sunnahPrayersList"></div>
+    </div>
+
+    <div class="divider"></div>
+
     <div class="sunnah-fasting">
       <h3>🌟 Sunnah Fasting Days</h3>
       <div class="fasting-list" id="fastingList"></div>
     </div>
 
-    <div class="hadith-section">
+    <div class="hadith-section" id="hadithSection">
       <div class="hadith-arabic">حَدَّثَنِي عَبْدُ اللَّهِ بْنُ مُحَمَّدٍ، حَدَّثَنَا هِشَامٌ، أَخْبَرَنَا مَعْمَرٌ، عَنِ الزُّهْرِيِّ، عَنِ ابْنِ الْمُسَيَّبِ، عَنْ أَبِي هُرَيْرَةَ ـ رضى الله عنه ـ عَنِ النَّبِيِّ صلى الله عليه وسلم قَالَ ‏ "‏ كُلُّ عَمَلِ ابْنِ آدَمَ لَهُ، إِلاَّ الصَّوْمَ فَإِنَّهُ لِي، وَأَنَا أَجْزِي بِهِ، وَلَخَلُوفُ فَمِ الصَّائِمِ أَطْيَبُ عِنْدَ اللَّهِ مِنْ رِيحِ الْمِسْكِ ‏"‏‏.‏</div>
       <div class="hadith-translation">Narrated Abu Huraira: The Prophet (ﷺ) said, "(Allah said), 'Every good deed of Adam's son is for him except fasting; it is for Me. and I shall reward (the fasting person) for it.' Verily, the smell of the mouth of a fasting person is better to Allah than the smell of musk."</div>
       <div class="hadith-reference">Sahih al-Bukhari 5927</div>
     </div>
 
-    <div class="quran-verse">
+    <div class="quran-verse" id="quranVerse">
       <div class="verse-arabic" id="verseArabic">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>
       <div class="verse-translation" id="verseTranslation">Loading daily verse...</div>
       <div class="verse-reference" id="verseReference"></div>
@@ -437,6 +837,8 @@
     let clockFormat = "24";
     let currentLocation = { lat: null, lon: null };
     let currentTimings = null;
+    let isRamadan = false;
+    let selectedKhatam = 1;
     
     const formatSelect = document.getElementById("format");
     formatSelect.value = clockFormat;
@@ -445,6 +847,42 @@
       updateSunsetClock();
       if (currentTimings) displayPrayerTimes(currentTimings);
     });
+
+    const ramadanHadith = [
+      {
+        arabic: "عَنْ أَبِي هُرَيْرَةَ رَضِيَ اللَّهُ عَنْهُ قَالَ: قَالَ رَسُولُ اللَّهِ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ: «إِذَا دَخَلَ رَمَضَانُ فُتِّحَتْ أَبْوَابُ الْجَنَّةِ، وَغُلِّقَتْ أَبْوَابُ جَهَنَّمَ، وَسُلْسِلَتِ الشَّيَاطِينُ»",
+        translation: "When Ramadan enters, the gates of Paradise are opened, the gates of Hellfire are closed and the devils are chained.",
+        reference: "Sahih al-Bukhari 1899"
+      },
+      {
+        arabic: "عَنْ أَبِي هُرَيْرَةَ رَضِيَ اللَّهُ عَنْهُ، عَنِ النَّبِيِّ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ قَالَ: «مَنْ قَامَ رَمَضَانَ إِيمَانًا وَاحْتِسَابًا، غُفِرَ لَهُ مَا تَقَدَّمَ مِنْ ذَنْبِهِ»",
+        translation: "Whoever stands (in prayer) in Ramadan out of faith and seeking reward, his previous sins will be forgiven.",
+        reference: "Sahih al-Bukhari 2009"
+      },
+      {
+        arabic: "عَنْ أَبِي هُرَيْرَةَ، عَنِ النَّبِيِّ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ قَالَ: «مَنْ صَامَ رَمَضَانَ إِيمَانًا وَاحْتِسَابًا غُفِرَ لَهُ مَا تَقَدَّمَ مِنْ ذَنْبِهِ»",
+        translation: "Whoever fasts Ramadan out of faith and seeking reward, his previous sins will be forgiven.",
+        reference: "Sahih al-Bukhari 38"
+      }
+    ];
+
+    const ramadanVerses = [
+      {
+        arabic: "يَا أَيُّهَا الَّذِينَ آمَنُوا كُتِبَ عَلَيْكُمُ الصِّيَامُ كَمَا كُتِبَ عَلَى الَّذِينَ مِن قَبْلِكُمْ لَعَلَّكُمْ تَتَّقُونَ",
+        translation: "O you who have believed, fasting is prescribed for you as it was prescribed for those before you, that you may become righteous",
+        reference: "Surah Al-Baqarah (2:183)"
+      },
+      {
+        arabic: "شَهْرُ رَمَضَانَ الَّذِي أُنزِلَ فِيهِ الْقُرْآنُ هُدًى لِّلنَّاسِ وَبَيِّنَاتٍ مِّنَ الْهُدَىٰ وَالْفُرْقَانِ",
+        translation: "The month of Ramadan in which was revealed the Quran, a guidance for the people and clear proofs of guidance and criterion",
+        reference: "Surah Al-Baqarah (2:185)"
+      },
+      {
+        arabic: "وَإِذَا سَأَلَكَ عِبَادِي عَنِّي فَإِنِّي قَرِيبٌ ۖ أُجِيبُ دَعْوَةَ الدَّاعِ إِذَا دَعَانِ",
+        translation: "And when My servants ask you concerning Me - indeed I am near. I respond to the invocation of the supplicant when he calls upon Me",
+        reference: "Surah Al-Baqarah (2:186)"
+      }
+    ];
 
     const quranVerses = [
       {
@@ -458,46 +896,156 @@
         reference: "Surah Adh-Dhariyat (51:56)"
       },
       {
-        arabic: "فَإِنَّ مَعَ الْعُسْرِ يُسْرًا ۝ إِنَّ مَعَ الْعُسْرِ يُسْرًا",
-        translation: "For indeed, with hardship comes ease. Indeed, with hardship comes ease",
-        reference: "Surah Ash-Sharh (94:5-6)"
-      },
-      {
-        arabic: "رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ",
-        translation: "Our Lord, give us good in this world and good in the Hereafter, and protect us from the punishment of the Fire",
-        reference: "Surah Al-Baqarah (2:201)"
-      },
-      {
-        arabic: "إِنَّ اللَّهَ مَعَ الصَّابِرِينَ",
-        translation: "Indeed, Allah is with the patient",
-        reference: "Surah Al-Baqarah (2:153)"
-      },
-      {
-        arabic: "وَلَا تَيْأَسُوا مِن رَّوْحِ اللَّهِ ۖ إِنَّهُ لَا يَيْأَسُ مِن رَّوْحِ اللَّهِ إِلَّا الْقَوْمُ الْكَافِرُونَ",
-        translation: "And do not despair of the mercy of Allah. Indeed, no one despairs of Allah's mercy except the disbelieving people",
-        reference: "Surah Yusuf (12:87)"
-      },
-      {
-        arabic: "قُلْ هُوَ اللَّهُ أَحَدٌ ۝ اللَّهُ الصَّمَدُ",
-        translation: "Say, He is Allah, [who is] One, Allah, the Eternal Refuge",
-        reference: "Surah Al-Ikhlas (112:1-2)"
-      },
-      {
-        arabic: "رَبِّ اشْرَحْ لِي صَدْرِي ۝ وَيَسِّرْ لِي أَمْرِي",
-        translation: "My Lord, expand for me my breast and ease for me my task",
-        reference: "Surah Ta-Ha (20:25-26)"
-      },
-      {
-        arabic: "وَهُوَ مَعَكُمْ أَيْنَ مَا كُنتُمْ",
-        translation: "And He is with you wherever you are",
-        reference: "Surah Al-Hadid (57:4)"
-      },
-      {
         arabic: "فَاذْكُرُونِي أَذْكُرْكُمْ وَاشْكُرُوا لِي وَلَا تَكْفُرُونِ",
         translation: "So remember Me; I will remember you. And be grateful to Me and do not deny Me",
         reference: "Surah Al-Baqarah (2:152)"
       }
     ];
+
+    function calculateQibla(lat, lon) {
+      const makkahLat = 21.4225;
+      const makkahLon = 39.8262;
+      
+      const latRad = lat * Math.PI / 180;
+      const lonRad = lon * Math.PI / 180;
+      const makkahLatRad = makkahLat * Math.PI / 180;
+      const makkahLonRad = makkahLon * Math.PI / 180;
+      
+      const lonDiff = makkahLonRad - lonRad;
+      
+      const y = Math.sin(lonDiff);
+      const x = Math.cos(latRad) * Math.tan(makkahLatRad) - Math.sin(latRad) * Math.cos(lonDiff);
+      
+      let qibla = Math.atan2(y, x) * 180 / Math.PI;
+      qibla = (qibla + 360) % 360;
+      
+      return qibla;
+    }
+
+    function updateQiblaCompass(qiblaDirection) {
+      document.getElementById('qiblaDirection').textContent = Math.round(qiblaDirection) + '°';
+      document.getElementById('compassNeedle').style.transform = 
+        `translate(-50%, -100%) rotate(${qiblaDirection}deg)`;
+      
+      let directionText = '';
+      if (qiblaDirection >= 337.5 || qiblaDirection < 22.5) directionText = 'North';
+      else if (qiblaDirection >= 22.5 && qiblaDirection < 67.5) directionText = 'Northeast';
+      else if (qiblaDirection >= 67.5 && qiblaDirection < 112.5) directionText = 'East';
+      else if (qiblaDirection >= 112.5 && qiblaDirection < 157.5) directionText = 'Southeast';
+      else if (qiblaDirection >= 157.5 && qiblaDirection < 202.5) directionText = 'South';
+      else if (qiblaDirection >= 202.5 && qiblaDirection < 247.5) directionText = 'Southwest';
+      else if (qiblaDirection >= 247.5 && qiblaDirection < 292.5) directionText = 'West';
+      else if (qiblaDirection >= 292.5 && qiblaDirection < 337.5) directionText = 'Northwest';
+      
+      document.getElementById('qiblaLocation').textContent = directionText;
+    }
+
+    function selectKhatam(times) {
+      selectedKhatam = times;
+      document.querySelectorAll('.khatam-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+      updateKhatamPlan(times);
+    }
+
+    function updateKhatamPlan(times) {
+      const totalPages = 604;
+      const days = 30;
+      const prayers = 5;
+      const pagesPerPrayer = Math.ceil((totalPages * times) / (days * prayers));
+      
+      const instruction = times === 1 
+        ? `Read <strong>${pagesPerPrayer} pages</strong> after each prayer to complete Quran once in Ramadan (30 days)`
+        : `Read <strong>${pagesPerPrayer} pages</strong> after each prayer to complete Quran ${times}x in Ramadan (30 days)`;
+      
+      document.querySelector('.khatam-instruction').innerHTML = instruction;
+      document.querySelectorAll('.khatam-pages').forEach(el => {
+        el.textContent = `${pagesPerPrayer} pages`;
+      });
+    }
+
+    function updateFastingTracker(timings) {
+      if (!timings) return;
+      
+      const now = new Date();
+      const fajrTime = timings.Fajr.split(':');
+      const maghribTime = timings.Maghrib.split(':');
+      
+      const fajr = new Date(now);
+      fajr.setHours(parseInt(fajrTime[0]), parseInt(fajrTime[1]), 0);
+      
+      const maghrib = new Date(now);
+      maghrib.setHours(parseInt(maghribTime[0]), parseInt(maghribTime[1]), 0);
+      
+      document.getElementById('fastingStart').textContent = timings.Fajr;
+      document.getElementById('fastingEnd').textContent = timings.Maghrib;
+      
+      if (isRamadan) {
+        document.getElementById('fastingTracker').classList.add('active');
+        
+        if (now >= fajr && now <= maghrib) {
+          const totalFastingTime = maghrib - fajr;
+          const elapsedTime = now - fajr;
+          const progress = (elapsedTime / totalFastingTime) * 100;
+          
+          document.getElementById('sunProgress').style.width = progress + '%';
+          document.getElementById('sunIcon').style.left = `calc(${progress}% - 16px)`;
+          
+          const remainingMs = maghrib - now;
+          const remainingHours = Math.floor(remainingMs / (1000 * 60 * 60));
+          const remainingMins = Math.floor((remainingMs % (1000 * 60 * 60)) / (1000 * 60));
+          
+          document.getElementById('fastingStatus').textContent = 
+            `⏰ Iftar in ${remainingHours}h ${remainingMins}m`;
+        } else if (now < fajr) {
+          document.getElementById('sunProgress').style.width = '0%';
+          document.getElementById('sunIcon').style.left = '-16px';
+          document.getElementById('fastingStatus').textContent = '🌙 Fasting starts at Fajr';
+        } else {
+          document.getElementById('sunProgress').style.width = '100%';
+          document.getElementById('sunIcon').style.left = 'calc(100% - 16px)';
+          document.getElementById('fastingStatus').textContent = '🎉 Fasting complete for today!';
+        }
+      }
+    }
+
+    function displaySunnahPrayers(timings) {
+      if (!timings) return;
+
+      const now = new Date();
+      const sunriseTime = timings.Sunrise.split(':');
+      const sunrise = new Date(now);
+      sunrise.setHours(parseInt(sunriseTime[0]), parseInt(sunriseTime[1]), 0);
+      
+      const duhaStart = new Date(sunrise.getTime() + 15 * 60000);
+      
+      const ishaTime = timings.Isha.split(':');
+      const isha = new Date(now);
+      isha.setHours(parseInt(ishaTime[0]), parseInt(ishaTime[1]), 0);
+      
+      const midnight = new Date(now);
+      midnight.setHours(24, 0, 0);
+      const fajrTime = timings.Fajr.split(':');
+      const fajr = new Date(now);
+      fajr.setDate(fajr.getDate() + 1);
+      fajr.setHours(parseInt(fajrTime[0]), parseInt(fajrTime[1]), 0);
+      
+      const lastThirdStart = new Date(midnight.getTime() + ((fajr - midnight) * 2/3));
+      
+      const sunnahPrayers = [
+        { name: "Duha (Chasht)", time: `${duhaStart.toLocaleTimeString('en-US', {hour: '2-digit', minute: '2-digit', hour12: false})} - 11:30` },
+        { name: "Taraweeh", time: `After ${timings.Isha}` },
+        { name: "Tahajjud", time: `${lastThirdStart.toLocaleTimeString('en-US', {hour: '2-digit', minute: '2-digit', hour12: false})} onwards` }
+      ];
+
+      const html = sunnahPrayers.map(prayer => `
+        <div class="sunnah-prayer-item">
+          <span class="sunnah-prayer-name">${prayer.name}</span>
+          <span class="sunnah-prayer-time">${prayer.time}</span>
+        </div>
+      `).join('');
+
+      document.getElementById('sunnahPrayersList').innerHTML = html;
+    }
 
     function getDayOfYear(date) {
       const start = new Date(date.getFullYear(), 0, 0);
@@ -508,11 +1056,27 @@
 
     function displayDailyVerse() {
       const dayOfYear = getDayOfYear(new Date());
-      const verse = quranVerses[dayOfYear % quranVerses.length];
+      
+      let verse, hadith;
+      if (isRamadan) {
+        verse = ramadanVerses[dayOfYear % ramadanVerses.length];
+        hadith = ramadanHadith[dayOfYear % ramadanHadith.length];
+      } else {
+        verse = quranVerses[dayOfYear % quranVerses.length];
+        hadith = {
+          arabic: "حَدَّثَنِي عَبْدُ اللَّهِ بْنُ مُحَمَّدٍ، حَدَّثَنَا هِشَامٌ، أَخْبَرَنَا مَعْمَرٌ، عَنِ الزُّهْرِيِّ، عَنِ ابْنِ الْمُسَيَّبِ، عَنْ أَبِي هُرَيْرَةَ ـ رضى الله عنه ـ عَنِ النَّبِيِّ صلى الله عليه وسلم قَالَ ‏ \"‏ كُلُّ عَمَلِ ابْنِ آدَمَ لَهُ، إِلاَّ الصَّوْمَ فَإِنَّهُ لِي، وَأَنَا أَجْزِي بِهِ، وَلَخَلُوفُ فَمِ الصَّائِمِ أَطْيَبُ عِنْدَ اللَّهِ مِنْ رِيحِ الْمِسْكِ ‏\"‏‏.‏",
+          translation: "Narrated Abu Huraira: The Prophet (ﷺ) said, \"(Allah said), 'Every good deed of Adam's son is for him except fasting; it is for Me. and I shall reward (the fasting person) for it.' Verily, the smell of the mouth of a fasting person is better to Allah than the smell of musk.\"",
+          reference: "Sahih al-Bukhari 5927"
+        };
+      }
       
       document.getElementById("verseArabic").textContent = verse.arabic;
       document.getElementById("verseTranslation").textContent = verse.translation;
       document.getElementById("verseReference").textContent = verse.reference;
+      
+      document.querySelector('.hadith-arabic').textContent = hadith.arabic;
+      document.querySelector('.hadith-translation').textContent = hadith.translation;
+      document.querySelector('.hadith-reference').textContent = hadith.reference;
     }
 
     function getSunset(date, lat, lon) {
@@ -557,48 +1121,53 @@
       }
     }
 
-    function displayHijriDate(hijriData) {
+    function displayDualCalendar(hijriData) {
       if (!hijriData) return;
       
-      const hijriStr = `${hijriData.day} ${hijriData.month.en} ${hijriData.year} AH`;
-      document.getElementById("hijriDate").textContent = hijriStr;
+      const hijriStr = `${hijriData.day} ${hijriData.month.en} ${hijriData.year}`;
+      document.getElementById("hijriDateFull").textContent = hijriStr;
+      document.getElementById("hijriDay").textContent = hijriData.weekday.en;
       
       const today = new Date();
       const gregorianStr = today.toLocaleDateString('en-US', { 
-        weekday: 'long', 
-        year: 'numeric', 
+        day: 'numeric',
         month: 'long', 
-        day: 'numeric' 
+        year: 'numeric'
       });
-      document.getElementById("gregorianDate").textContent = gregorianStr;
+      const dayStr = today.toLocaleDateString('en-US', { weekday: 'long' });
+      
+      document.getElementById("gregorianDateFull").textContent = gregorianStr;
+      document.getElementById("gregorianDay").textContent = dayStr;
     }
 
-    function calculateRamadanCountdown(currentHijriMonth, currentHijriDay) {
+    function calculateRamadanInfo(currentHijriMonth, currentHijriDay) {
       const currentMonth = parseInt(currentHijriMonth);
       const currentDay = parseInt(currentHijriDay);
       
-      let daysUntilRamadan;
-      
-      if (currentMonth < 9) {
-        const daysInCurrentMonth = 30;
-        const daysLeftInMonth = daysInCurrentMonth - currentDay;
-        let monthsBetween = 8 - currentMonth;
-        daysUntilRamadan = daysLeftInMonth + (monthsBetween * 30);
-      } else if (currentMonth === 9) {
-        document.getElementById("ramadanCounter").innerHTML = `
-          <h3>🌙 Ramadan Mubarak!</h3>
-          <p style="font-size: 18px; color: #856404; margin-top: 8px;">We are in the blessed month of Ramadan</p>
-        `;
-        return;
+      if (currentMonth === 9) {
+        isRamadan = true;
+        const daysLeft = 30 - currentDay;
+        document.getElementById("ramadanMessage").innerHTML = 
+          `<strong>Day ${currentDay} of 30</strong><br>${daysLeft} days left in Ramadan`;
       } else {
-        const daysInCurrentMonth = 30;
-        const daysLeftInMonth = daysInCurrentMonth - currentDay;
-        let monthsUntilNext = 12 - currentMonth + 8;
-        daysUntilRamadan = daysLeftInMonth + (monthsUntilNext * 30);
+        isRamadan = false;
+        let daysUntilRamadan;
+        
+        if (currentMonth < 9) {
+          const daysInCurrentMonth = 30;
+          const daysLeftInMonth = daysInCurrentMonth - currentDay;
+          let monthsBetween = 8 - currentMonth;
+          daysUntilRamadan = daysLeftInMonth + (monthsBetween * 30);
+        } else {
+          const daysInCurrentMonth = 30;
+          const daysLeftInMonth = daysInCurrentMonth - currentDay;
+          let monthsUntilNext = 12 - currentMonth + 8;
+          daysUntilRamadan = daysLeftInMonth + (monthsUntilNext * 30);
+        }
+        
+        document.getElementById("ramadanMessage").textContent = 
+          `${daysUntilRamadan} days left for Ramadan`;
       }
-      
-      document.getElementById("ramadanDays").textContent = daysUntilRamadan;
-      document.getElementById("ramadanText").textContent = daysUntilRamadan === 1 ? "day remaining" : "days remaining";
     }
 
     function displaySunnahFastingDays(hijriData) {
@@ -608,35 +1177,20 @@
       
       const fastingDays = [];
       
-      if (dayOfWeek === 1) {
-        fastingDays.push({ text: "Today is Monday - Sunnah fasting day", isToday: true });
-      } else {
-        fastingDays.push({ text: "Monday - Sunnah fasting day", isToday: false });
-      }
+      if (dayOfWeek === 1) fastingDays.push({ text: "Today is Monday - Sunnah fasting day", isToday: true });
+      else fastingDays.push({ text: "Monday - Sunnah fasting day", isToday: false });
       
-      if (dayOfWeek === 4) {
-        fastingDays.push({ text: "Today is Thursday - Sunnah fasting day", isToday: true });
-      } else {
-        fastingDays.push({ text: "Thursday - Sunnah fasting day", isToday: false });
-      }
+      if (dayOfWeek === 4) fastingDays.push({ text: "Today is Thursday - Sunnah fasting day", isToday: true });
+      else fastingDays.push({ text: "Thursday - Sunnah fasting day", isToday: false });
       
-      if (hijriDay === 13) {
-        fastingDays.push({ text: "Today is 13th (Ayyam al-Bid) - White Days", isToday: true });
-      } else {
-        fastingDays.push({ text: "13th of Hijri month (Ayyam al-Bid)", isToday: false });
-      }
+      if (hijriDay === 13) fastingDays.push({ text: "Today is 13th (Ayyam al-Bid) - White Days", isToday: true });
+      else fastingDays.push({ text: "13th of Hijri month (Ayyam al-Bid)", isToday: false });
       
-      if (hijriDay === 14) {
-        fastingDays.push({ text: "Today is 14th (Ayyam al-Bid) - White Days", isToday: true });
-      } else {
-        fastingDays.push({ text: "14th of Hijri month (Ayyam al-Bid)", isToday: false });
-      }
+      if (hijriDay === 14) fastingDays.push({ text: "Today is 14th (Ayyam al-Bid) - White Days", isToday: true });
+      else fastingDays.push({ text: "14th of Hijri month (Ayyam al-Bid)", isToday: false });
       
-      if (hijriDay === 15) {
-        fastingDays.push({ text: "Today is 15th (Ayyam al-Bid) - White Days", isToday: true });
-      } else {
-        fastingDays.push({ text: "15th of Hijri month (Ayyam al-Bid)", isToday: false });
-      }
+      if (hijriDay === 15) fastingDays.push({ text: "Today is 15th (Ayyam al-Bid) - White Days", isToday: true });
+      else fastingDays.push({ text: "15th of Hijri month (Ayyam al-Bid)", isToday: false });
       
       const listHTML = fastingDays.map(day => `
         <div class="fasting-item ${day.isToday ? 'today' : ''}">
@@ -699,8 +1253,9 @@
       }).join('');
       
       document.getElementById("prayersGrid").innerHTML = gridHTML;
-      
       updateNextPrayer(timings);
+      updateFastingTracker(timings);
+      displaySunnahPrayers(timings);
     }
 
     function updateNextPrayer(timings) {
@@ -743,4 +1298,61 @@
       const sunsetToday = getSunset(now, currentLocation.lat, currentLocation.lon);
       let refSunset = sunsetToday;
       
-      if (now
+      if (now < sunsetToday) {
+        const yesterday = new Date(now.getTime() - 86400000);
+        refSunset = getSunset(yesterday, currentLocation.lat, currentLocation.lon);
+      }
+
+      const diffMs = now - refSunset;
+      const diffMinutes = Math.floor(diffMs / 60000);
+      const hours = Math.floor(diffMinutes / 60) % 24;
+      const minutes = diffMinutes % 60;
+
+      document.getElementById("time").textContent = formatTime(hours, minutes, clockFormat);
+      document.getElementById("meta").textContent = `Sunset reference: ${refSunset.toLocaleTimeString()} | Current: ${now.toLocaleTimeString()}`;
+    }
+
+    async function updateAll() {
+      updateKhatamPlan(selectedKhatam);
+      
+      navigator.geolocation.getCurrentPosition(
+        async pos => {
+          currentLocation.lat = pos.coords.latitude;
+          currentLocation.lon = pos.coords.longitude;
+          
+          const qiblaDirection = calculateQibla(currentLocation.lat, currentLocation.lon);
+          updateQiblaCompass(qiblaDirection);
+          
+          updateSunsetClock();
+          
+          const data = await getPrayerTimes(currentLocation.lat, currentLocation.lon);
+          
+          if (data) {
+            currentTimings = data.timings;
+            displayDualCalendar(data.date.hijri);
+            calculateRamadanInfo(data.date.hijri.month.number, data.date.hijri.day);
+            displaySunnahFastingDays(data.date.hijri);
+            displayPrayerTimes(data);
+            displayDailyVerse();
+          }
+        },
+        error => {
+          console.error("Geolocation error:", error);
+          document.getElementById("meta").textContent = "Please enable location access";
+          document.getElementById("nextPrayer").textContent = "Location access required";
+          document.getElementById("ramadanMessage").textContent = "Location required";
+        }
+      );
+    }
+
+    updateAll();
+    setInterval(() => {
+      updateSunsetClock();
+      if (currentTimings) {
+        updateNextPrayer(currentTimings);
+        updateFastingTracker(currentTimings);
+      }
+    }, 60000);
+  </script>
+</body>
+</html>
