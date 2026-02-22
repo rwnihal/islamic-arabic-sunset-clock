@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Arabic sunset clock with Hijri calendar, Islamic prayer times, Qibla finder, Ramadan tracker, and Sunnah prayer calculator.">
-  <meta name="keywords" content="Arabic clock, sunset clock, Islamic prayer times, Hijri calendar, Ramadan countdown, Qibla finder, Sunnah prayers">
+  <meta name="description" content="Arabic sunset clock with Hijri calendar, Islamic prayer times, Ramadan tracker, and Quran Khatam calculator.">
+  <meta name="keywords" content="Arabic clock, sunset clock, Islamic prayer times, Hijri calendar, Ramadan countdown, Sunnah prayers">
   <meta name="author" content="Nihal PS">
   <title>Arabic Sunset Clock — Islamic Calendar & Prayer Times</title>
   
@@ -45,6 +45,31 @@
       font-size: 24px;
       color: #333;
       margin-bottom: 8px;
+    }
+
+    .about-clock {
+      background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+      border-left: 4px solid #1976d2;
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 24px;
+    }
+
+    .about-clock h3 {
+      font-size: 16px;
+      color: #0d47a1;
+      margin-bottom: 8px;
+    }
+
+    .about-clock p {
+      font-size: 13px;
+      color: #1565c0;
+      line-height: 1.6;
+      margin-bottom: 6px;
+    }
+
+    .about-clock p:last-child {
+      margin-bottom: 0;
     }
 
     .dual-calendar {
@@ -276,84 +301,6 @@
       font-weight: 600;
     }
 
-    .qibla-finder {
-      background: linear-gradient(135deg, #e0c3fc, #8ec5fc);
-      border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 24px;
-      text-align: center;
-    }
-
-    .qibla-finder h3 {
-      color: #4a148c;
-      font-size: 18px;
-      margin-bottom: 16px;
-    }
-
-    .compass-container {
-      position: relative;
-      width: 200px;
-      height: 200px;
-      margin: 0 auto 16px;
-      background: white;
-      border-radius: 50%;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    }
-
-    .compass {
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      position: relative;
-      background: radial-gradient(circle, #fff 30%, #f0f0f0 100%);
-    }
-
-    .compass-needle {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 4px;
-      height: 80px;
-      background: linear-gradient(to bottom, #e74c3c 50%, #95a5a6 50%);
-      transform-origin: center bottom;
-      transform: translate(-50%, -100%) rotate(0deg);
-      transition: transform 0.5s ease;
-      border-radius: 2px;
-    }
-
-    .compass-center {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 12px;
-      height: 12px;
-      background: #2c3e50;
-      border-radius: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 10;
-    }
-
-    .compass-directions {
-      position: absolute;
-      top: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 16px;
-      font-weight: 700;
-      color: #e74c3c;
-    }
-
-    .qibla-info {
-      font-size: 14px;
-      color: #4a148c;
-    }
-
-    .qibla-info strong {
-      display: block;
-      font-size: 24px;
-      margin: 8px 0;
-    }
-
     .sunset-clock {
       text-align: center;
       margin-bottom: 24px;
@@ -484,6 +431,20 @@
       font-variant-numeric: tabular-nums;
     }
 
+    .time-explanation {
+      background: #f5f5f5;
+      padding: 12px;
+      border-radius: 6px;
+      margin-top: 12px;
+      font-size: 11px;
+      color: #666;
+      line-height: 1.5;
+    }
+
+    .time-explanation strong {
+      color: #333;
+    }
+
     .prayer-source {
       font-size: 11px;
       color: #999;
@@ -528,46 +489,6 @@
     .sunnah-prayer-time {
       color: #f57c00;
       font-weight: 600;
-    }
-
-    .sunnah-fasting {
-      background: #e7f3ff;
-      border-left: 4px solid #2196f3;
-      padding: 16px;
-      border-radius: 8px;
-      margin-bottom: 24px;
-    }
-
-    .sunnah-fasting h3 {
-      font-size: 18px;
-      color: #0d47a1;
-      margin-bottom: 12px;
-    }
-
-    .fasting-list {
-      display: grid;
-      gap: 8px;
-    }
-
-    .fasting-item {
-      display: flex;
-      align-items: center;
-      font-size: 14px;
-      color: #333;
-      padding: 8px;
-      background: white;
-      border-radius: 6px;
-    }
-
-    .fasting-item.today {
-      background: #fff9c4;
-      font-weight: 600;
-      border-left: 3px solid #fbc02d;
-    }
-
-    .fasting-icon {
-      margin-right: 8px;
-      font-size: 18px;
     }
 
     .hadith-section {
@@ -678,11 +599,6 @@
         padding: 8px 16px;
         font-size: 13px;
       }
-
-      .compass-container {
-        width: 160px;
-        height: 160px;
-      }
     }
   </style>
 </head>
@@ -690,6 +606,13 @@
   <div class="clock-container">
     <div class="header">
       <h1>🌙 Arabic Sunset Clock</h1>
+    </div>
+
+    <div class="about-clock">
+      <h3>📜 About the Arabic Sunset Clock</h3>
+      <p><strong>Historical Significance:</strong> In Islamic tradition, the day begins and ends at sunset (Maghrib), not midnight. This ancient timekeeping method was used throughout the Muslim world for centuries.</p>
+      <p><strong>Saudi Arabia's Heritage:</strong> Until 1968, Saudi Arabia officially used this sunset-based clock system. King Faisal transitioned to the Gregorian calendar to align with international standards, but the cultural and religious significance remains.</p>
+      <p><strong>Religious Connection:</strong> Islamic practices like fasting and daily prayers are intrinsically tied to solar positions, making this clock a natural reflection of Islamic worship rhythms.</p>
     </div>
 
     <div class="dual-calendar">
@@ -764,22 +687,6 @@
       </div>
     </div>
 
-    <div class="qibla-finder">
-      <h3>🕋 Qibla Direction</h3>
-      <div class="compass-container">
-        <div class="compass">
-          <div class="compass-directions">N</div>
-          <div class="compass-needle" id="compassNeedle"></div>
-          <div class="compass-center"></div>
-        </div>
-      </div>
-      <div class="qibla-info">
-        <div>Qibla Direction</div>
-        <strong id="qiblaDirection">--°</strong>
-        <div id="qiblaLocation">Calculating...</div>
-      </div>
-    </div>
-
     <div class="sunset-clock">
       <div class="time-display" id="time">--:--</div>
       <div class="clock-meta" id="meta">Calculating sunset time...</div>
@@ -798,6 +705,13 @@
       <h3>🕌 Islamic Prayer Times</h3>
       <div class="next-prayer" id="nextPrayer">Loading prayer times...</div>
       <div class="prayers-grid" id="prayersGrid"></div>
+      
+      <div class="time-explanation">
+        <strong>About Time Display:</strong><br>
+        • <strong>Local Time:</strong> Standard time based on your timezone (follows Gregorian 24-hour cycle starting at midnight)<br>
+        • <strong>Sunset Time:</strong> Arabic/Islamic time where the day begins at Maghrib (sunset). Calculated as hours elapsed since yesterday's sunset, resetting to 00:00 at each day's Maghrib prayer
+      </div>
+      
       <div class="prayer-source">Based on: Umm al-Qura, Makkah calculation method</div>
     </div>
 
@@ -806,13 +720,6 @@
     <div class="sunnah-prayers">
       <h3>🌟 Sunnah Prayer Times</h3>
       <div class="sunnah-prayer-list" id="sunnahPrayersList"></div>
-    </div>
-
-    <div class="divider"></div>
-
-    <div class="sunnah-fasting">
-      <h3>🌟 Sunnah Fasting Days</h3>
-      <div class="fasting-list" id="fastingList"></div>
     </div>
 
     <div class="hadith-section" id="hadithSection">
@@ -901,44 +808,6 @@
         reference: "Surah Al-Baqarah (2:152)"
       }
     ];
-
-    function calculateQibla(lat, lon) {
-      const makkahLat = 21.4225;
-      const makkahLon = 39.8262;
-      
-      const latRad = lat * Math.PI / 180;
-      const lonRad = lon * Math.PI / 180;
-      const makkahLatRad = makkahLat * Math.PI / 180;
-      const makkahLonRad = makkahLon * Math.PI / 180;
-      
-      const lonDiff = makkahLonRad - lonRad;
-      
-      const y = Math.sin(lonDiff);
-      const x = Math.cos(latRad) * Math.tan(makkahLatRad) - Math.sin(latRad) * Math.cos(lonDiff);
-      
-      let qibla = Math.atan2(y, x) * 180 / Math.PI;
-      qibla = (qibla + 360) % 360;
-      
-      return qibla;
-    }
-
-    function updateQiblaCompass(qiblaDirection) {
-      document.getElementById('qiblaDirection').textContent = Math.round(qiblaDirection) + '°';
-      document.getElementById('compassNeedle').style.transform = 
-        `translate(-50%, -100%) rotate(${qiblaDirection}deg)`;
-      
-      let directionText = '';
-      if (qiblaDirection >= 337.5 || qiblaDirection < 22.5) directionText = 'North';
-      else if (qiblaDirection >= 22.5 && qiblaDirection < 67.5) directionText = 'Northeast';
-      else if (qiblaDirection >= 67.5 && qiblaDirection < 112.5) directionText = 'East';
-      else if (qiblaDirection >= 112.5 && qiblaDirection < 157.5) directionText = 'Southeast';
-      else if (qiblaDirection >= 157.5 && qiblaDirection < 202.5) directionText = 'South';
-      else if (qiblaDirection >= 202.5 && qiblaDirection < 247.5) directionText = 'Southwest';
-      else if (qiblaDirection >= 247.5 && qiblaDirection < 292.5) directionText = 'West';
-      else if (qiblaDirection >= 292.5 && qiblaDirection < 337.5) directionText = 'Northwest';
-      
-      document.getElementById('qiblaLocation').textContent = directionText;
-    }
 
     function selectKhatam(times) {
       selectedKhatam = times;
@@ -1170,38 +1039,6 @@
       }
     }
 
-    function displaySunnahFastingDays(hijriData) {
-      const hijriDay = parseInt(hijriData.day);
-      const today = new Date();
-      const dayOfWeek = today.getDay();
-      
-      const fastingDays = [];
-      
-      if (dayOfWeek === 1) fastingDays.push({ text: "Today is Monday - Sunnah fasting day", isToday: true });
-      else fastingDays.push({ text: "Monday - Sunnah fasting day", isToday: false });
-      
-      if (dayOfWeek === 4) fastingDays.push({ text: "Today is Thursday - Sunnah fasting day", isToday: true });
-      else fastingDays.push({ text: "Thursday - Sunnah fasting day", isToday: false });
-      
-      if (hijriDay === 13) fastingDays.push({ text: "Today is 13th (Ayyam al-Bid) - White Days", isToday: true });
-      else fastingDays.push({ text: "13th of Hijri month (Ayyam al-Bid)", isToday: false });
-      
-      if (hijriDay === 14) fastingDays.push({ text: "Today is 14th (Ayyam al-Bid) - White Days", isToday: true });
-      else fastingDays.push({ text: "14th of Hijri month (Ayyam al-Bid)", isToday: false });
-      
-      if (hijriDay === 15) fastingDays.push({ text: "Today is 15th (Ayyam al-Bid) - White Days", isToday: true });
-      else fastingDays.push({ text: "15th of Hijri month (Ayyam al-Bid)", isToday: false });
-      
-      const listHTML = fastingDays.map(day => `
-        <div class="fasting-item ${day.isToday ? 'today' : ''}">
-          <span class="fasting-icon">${day.isToday ? '🌙' : '📅'}</span>
-          ${day.text}
-        </div>
-      `).join('');
-      
-      document.getElementById("fastingList").innerHTML = listHTML;
-    }
-
     async function getPrayerTimes(lat, lon) {
       const today = new Date();
       const dateStr = `${today.getDate()}-${today.getMonth() + 1}-${today.getFullYear()}`;
@@ -1320,9 +1157,6 @@
           currentLocation.lat = pos.coords.latitude;
           currentLocation.lon = pos.coords.longitude;
           
-          const qiblaDirection = calculateQibla(currentLocation.lat, currentLocation.lon);
-          updateQiblaCompass(qiblaDirection);
-          
           updateSunsetClock();
           
           const data = await getPrayerTimes(currentLocation.lat, currentLocation.lon);
@@ -1331,7 +1165,6 @@
             currentTimings = data.timings;
             displayDualCalendar(data.date.hijri);
             calculateRamadanInfo(data.date.hijri.month.number, data.date.hijri.day);
-            displaySunnahFastingDays(data.date.hijri);
             displayPrayerTimes(data);
             displayDailyVerse();
           }
